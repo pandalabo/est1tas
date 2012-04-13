@@ -1,0 +1,20 @@
+#summary links of texts and data
+
+= Links =
+
+[http://www.rpgdl.org/sfc/est1.html RPG Data Library - エストポリス伝記] -チャート＋お店データが充実
+
+[http://lufia.org/estpolis/ ルフィアノート] - 各種データが充実
+
+[http://www8.plala.or.jp/tabito/estpolis/est1/estpolis.html Re-est様「エストポリス伝記1」攻略ページ] - 全アイテム回収チャートが大変便利
+
+[http://www.f6.dion.ne.jp/~lufia/esut1_kou.htm エストポリス伝記１の攻略] - any%でボス一直線に行くルートが書かれた攻略チャート
+
+[http://www.geocities.co.jp/Playtown/1377/sfc/00/index01.html 闇の王国様のエストポリス伝記攻略] - 各ダンジョンのマップがあります
+
+= Details =
+
+Add your content here.  Format your content with:
+  * Text in *bold* or _italic_
+  * Headings, paragraphs, and lists
+  * Automatic links to other wiki pages
