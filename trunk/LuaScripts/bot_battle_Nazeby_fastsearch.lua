@@ -1,7 +1,7 @@
 --[[
 	ランダム行動を複数回試行し、最も結果が良かったものを採用する
-	全行動パターンの組み合わせを考えると、億、兆の単位を超えるため処理不可
-	20^8
+	全行動パターンの組み合わせを考えると、億をかるく超えるため処理不可 20^8 くらい?
+	ある程度経験則からBOTに取らせる行動を限定し、少ない試行で最適解に近いものを探す
 ]]
 
 local frame	--現在検証中のフレーム
@@ -9,16 +9,19 @@ local search_count = 0 --初期フレームからの試行回数
 
 --調査の限界
 --超過した場合、遅すぎるので中断（手動戦闘結果より遅かったら意味がない）
-local max_frame = 366000 --戦闘終了時の基準フレーム
-local max_search = 200 --戦闘開始を遅らせて試行を始める最大フレーム数
+local max_frame = 396000 --戦闘終了時（敵HPが0になった瞬間）の基準フレーム
+local max_search = 100 --戦闘開始を遅らせて試行を始める最大フレーム数
 
-local try_count = 255 --1つの戦闘開始フレームに対し、BOT戦闘を試行する回数
+local try_count = 400 --1つの戦闘開始フレームに対し、BOT戦闘を試行する回数
 
 --調査中の最良結果フレーム
 local best_frame = 9999999
 
+--調査中の勝利回数とかも表示した方がLuaを中断する目安になっていい・・？
+
+
 --botによるre-recordカウントをスキップするか *defualt false
-movie.rerecordcounting(true)
+movie.rerecordcounting(false)
 print("re-recordcount: " .. movie.rerecordcount())
 
 --現在時刻で乱数を初期化
@@ -97,9 +100,8 @@ function power_drug01()
 	fadv(3)
 end
 
---ドレン（ルフィア）
 local doren_count = 0	--ドレン使用回数に制限
-
+--ドレン（ルフィア）
 function doren()
 
 	doren_count = doren_count + 1
@@ -115,9 +117,25 @@ function doren()
 end
 
 --エストナ（ルフィア）
-function estna()
+function estna_01()
 	joypad.set(1,{A=true,up=true})
 	fadv(5)	--一覧ロード時間に若干差がある？ため1フレーム余裕を持たせる
+	joypad.set(1,{A=true})
+	fadv(4)
+	joypad.set(1,{A=true})
+	fadv(3)
+end
+
+--エストナ（ジュリナ）
+function estna_02()
+	joypad.set(1,{A=true,up=true})
+	fadv(5)	--一覧ロード時間に若干差がある？ため1フレーム余裕を持たせる
+	joypad.set(1,{right=true})
+	fadv(2)
+	joypad.set(1,{right=true})
+	fadv(2)
+	joypad.set(1,{up=true})
+	fadv(2)
 	joypad.set(1,{A=true})
 	fadv(4)
 	joypad.set(1,{A=true})
@@ -153,51 +171,53 @@ function pattern_01()
 	p4hp_max = memory.readword(0x7E16F6)
 	p4hp = memory.readword(0x7E1595)
 	
+	--パーティの状態による判断（正常：0、まひ：+1、せきか：+2、どく：+16、戦闘不能：+32、ムージル：+64）
+	p1st = memory.readbyte(0x7E158B) --主人公状態
+	p2st = memory.readbyte(0x7E158C) --ルフィア状態
+	p3st = memory.readbyte(0x7E158D) --アグロス状態
+	p4st = memory.readbyte(0x7E158E) --ジュリナ状態
+	
 	--PT全員のHPが半分より減っている場合はエストナを使用する確率を上げる
 	if p1hp_max - p1hp > p1hp_max / 2 and p2hp_max - p2hp > p2hp_max / 2 and p3hp_max - p3hp > p3hp_max / 2 and p4hp_max - p4hp > p4hp_max / 2 then
 		r = math.random(2)
 		if r == 1 then
-			estna()
-			return
+			if p2st < 64 then	--ムージルの状態でない
+				estna_01()
+				return
+			end
 		end
-	end
-	
-	--パーティの状態による判断（正常：0、まひ：+1、せきか：+2、どく：+16、戦闘不能：+32）
-	p1st = memory.readbyte(0x7E158B) --主人公状態
-	p3st = memory.readbyte(0x7E158D) --アグロス状態
+	end	
 
 	r = math.random(6)
 	if r == 1 then
-		if p1st == 0 then
-			if power_drug00_count < 3 then
-				power_drug00()	--主人公が生きていればパワードラッグを使用（3回まで）
-			else
-				pattern_01() --再度行動選択
-			end
+		--主人公が生きていればパワードラッグを使用（3回まで）
+		if p1hp > 0 and power_drug00_count < 3 then
+			power_drug00()	
 		else
 			pattern_01() --再度行動選択
 		end
 	elseif r == 2 then
-		if p3st == 0 then
-			if power_drug01_count < 3 then
-				power_drug01()	--アグロスが生きていればパワードラッグを使用（3回まで）
-			else
-				pattern_01() --再度行動選択
-			end
+		--アグロスが生きていればパワードラッグを使用（3回まで）
+		if p3hp > 0 and power_drug01_count < 3 then
+			power_drug01()	
 		else
 			pattern_01() --再度行動選択
 		end
 	elseif r == 3 then
-		--ドレンは2回まで
-		if doren_count < 2 then
-			pattern_01() --再度行動選択
-		else
+		--ドレンは2回まで、ムージルの状態でない
+		if doren_count < 2 and  p2st < 64 then
 			doren()
+		else
+			pattern_01() --再度行動選択
 		end
 	elseif r == 4 then
 		weapon_attack()
 	elseif r == 5 then
-		estna()
+		if p2st < 64 then	--ムージルの状態でない
+			estna_01()
+		else
+			pattern_01() --再度行動選択
+		end
 	else
 		guard()
 	end
@@ -214,33 +234,55 @@ end
 --ジュリナの行動
 function pattern_03()
 
-	--パーティの状態による判断（正常：0、まひ：+1、せきか：+2、どく：+16、戦闘不能：+32）
+	--パーティのHPによる判断
+	p1hp_max = memory.readword(0x7E16F0)
+	p1hp = memory.readword(0x7E158F)
+	p2hp_max = memory.readword(0x7E16F2)
+	p2hp = memory.readword(0x7E1591)
+	p3hp_max = memory.readword(0x7E16F4)
+	p3hp = memory.readword(0x7E1593)
+	p4hp_max = memory.readword(0x7E16F6)
+	p4hp = memory.readword(0x7E1595)
+	
+	--パーティの状態による判断（正常：0、まひ：+1、せきか：+2、どく：+16、戦闘不能：+32、ムージル：+64）
 	p1st = memory.readbyte(0x7E158B) --主人公状態
+	p2st = memory.readbyte(0x7E158C) --ルフィア状態
 	p3st = memory.readbyte(0x7E158D) --アグロス状態
-
-
-	r = math.random(4)
-	if r == 1 then
-		if p1st == 0 then
-			if power_drug00_count < 3 then
-				power_drug00()	--主人公が生きていればパワードラッグを使用（3回まで）
-			else
-				pattern_03() --再度行動選択
+	p4st = memory.readbyte(0x7E158E) --ジュリナ状態
+	
+	--PT全員のHPが半分より減っている場合はエストナを使用する確率を上げる
+	if p1hp_max - p1hp > p1hp_max / 2 and p2hp_max - p2hp > p2hp_max / 2 and p3hp_max - p3hp > p3hp_max / 2 and p4hp_max - p4hp > p4hp_max / 2 then
+		r = math.random(3)
+		if r == 1 then
+			if p4st < 64 then
+				estna_02()
+				return
 			end
+		end
+	end
+
+	r = math.random(5)
+	if r == 1 then
+		--主人公が生きていればパワードラッグを使用（3回まで）
+		if p1hp > 0 and power_drug00_count < 3 then
+			power_drug00()	
 		else
 			pattern_03()	--再度行動選択
 		end
 	elseif r == 2 then
-		if p3st == 0 then
-			if power_drug01_count < 3 then
-				power_drug01()	--アグロスが生きていればパワードラッグを使用（3回まで）
-			else
-				pattern_03() --再度行動選択
-			end
+		--アグロスが生きていればパワードラッグを使用（3回まで）
+		if p3hp > 0 and power_drug01_count < 3 then
+			power_drug01()	
 		else
 			pattern_03()	--再度行動選択
 		end
 	elseif r == 3 then
+		if p4st < 64 then	--ムージルの状態でない
+			estna_02()
+		else
+			pattern_03()	--再度行動選択
+		end
+	elseif r == 4 then
 		weapon_attack()
 	else
 		guard()
@@ -296,15 +338,15 @@ function failure()
 	p3hp = memory.readword(0x7E1593)
 	p4hp_max = memory.readword(0x7E16F6)
 	p4hp = memory.readword(0x7E1595)
-	--パーティの状態による判断（正常：0、まひ：+1、せきか：+2、どく：+16、戦闘不能：+32）
+	
+	--パーティの状態による判断（正常：0、まひ：+1、せきか：+2、どく：+16、戦闘不能：+32、ムージル：+64）
 	p1st = memory.readbyte(0x7E158B) --主人公状態
 	p2st = memory.readbyte(0x7E158C) --ルフィア状態
 	p3st = memory.readbyte(0x7E158D) --アグロス状態
 	p4st = memory.readbyte(0x7E158E) --ジュリナ状態
 	
 	--[[
-	--PT全体で400ダメージ以上受けたら失敗（戦闘開始前の毒沼ダメージ含めて）
-	--ほのおのいき1回までは許容することになる・・・？
+	--PT全体で400ダメージ以上受けたら失敗（戦闘開始前のダメージ含めて）
 	total_damage = p1hp_max - p1hp + p2hp_max - p2hp + p3hp_max - p3hp + p4hp_max - p4hp
 	
 	if total_damage > 400 then
@@ -314,7 +356,9 @@ function failure()
 	]]
 	
 	--誰かが倒れた場合、失敗
-	if p1st ~= 0 or p2st ~= 0 or p3st ~= 0 or p4st ~= 0 then
+	--if p1hp == 0 or p2hp == 0 or p3hp == 0 or p4hp == 0 then
+	if p1hp == 0 or p3hp == 0 or p4hp == 0 then	--ルフィア以外
+	--if p4hp == 0 then --ジュリナのみ
 		fail_flag = true
 		--print("someone is dead")
 	end
@@ -443,6 +487,7 @@ while true do
 				savestate.save(state_best) --最短を保存
 				
 				best_frame = emu.framecount()
+				max_frame = best_frame	--今後の探索では最短結果より遅い場合打ち切る
 				
 				print("best state is saved, framecount: " .. best_frame )
 			end

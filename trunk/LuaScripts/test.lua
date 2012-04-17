@@ -1,18 +1,14 @@
-count = 0
+require "mt19937"
 
-function recoursive()
-	count = count + 1
-	
-	if count < 5 then
-		recoursive()
-		return 0
-	end
-	
-	return 1
-	
+--local randomseed = mt19937.randomseed
+--local random = mt19937.random
+
+mt19937.randomseed(os.time())
+math.randomseed(os.time())
+for i = 1, 10 do
+    local rmt = mt19937.random(5)
+    --local ri = math.floor(rf * 10)
+	local r = math.random(5)
+    print(rmt .. "\t" .. r)
 end
 
-n = math.random(1)
-print(n)
-n = math.random(10)
-print(n)
