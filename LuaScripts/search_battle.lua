@@ -8,8 +8,8 @@ flag = 2 --やり直しの状態を管理するフラグ
 2:待ち中, 3:乱数調整完了]]
 
 --emu.speedmode("maximum")
-emu.speedmode("turbo")
---emu.speedmode("nothrottle")
+--emu.speedmode("turbo")
+emu.speedmode("nothrottle")
 
 --セーブステートの都合上registerafterが必要になる
 --フラグ管理関数をフレーム処理の直前にコールバックさせる
@@ -28,7 +28,8 @@ end)
 while true do
 	if flag == 2 then
 	--待ち中であれば、Aを押し続ける
-	joypad.set(1,{A=true})
+	--joypad.set(1,{A=true})
+	joypad.set(1,{A=true,right=true})
 		frame = emu.framecount()
 		search_count = search_count + 1
 		print("searching at " .. frame-1 .. "frame, count " .. search_count)
@@ -36,7 +37,7 @@ while true do
 		--ここに結果の判定方法を書く
 		
 		--一定フレーム待機
-		for i=0, 1000 do
+		for i=0, 500 do
 			emu.frameadvance()
 		end
 		
@@ -46,7 +47,7 @@ while true do
 		en3hp = memory.readword(0x7ee642)
 		en4hp = memory.readword(0x7ee6C2)
 		
-		if  en1hp == 0 then
+		if  en2hp == 0 then
 			flag = 3 --乱数調整終了
 		else
 			flag = 0 --フラグをやり直しにする
