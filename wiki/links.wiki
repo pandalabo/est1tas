@@ -19,3 +19,9 @@
 ==Emulator==
 
 [http://code.google.com/p/snes9x-rr/ Snes9x 1.43 rerecording v17]
+
+==Other Speedrun==
+[http://archive.org/details/LufiaAndTheFortressOfDoom_tas_testrun1_zidanax Lufia & the fortress of doom TAS testrun]
+
+[http://speeddemosarchive.com/Lufia.html LufiaSpeedrun - posted on SDA]
+
