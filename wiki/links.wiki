@@ -1,4 +1,4 @@
-#summary links of texts and data
+#summary texts and data links
 
 = Links =
 
@@ -13,10 +13,3 @@
 [http://www.geocities.co.jp/Playtown/1377/sfc/00/index01.html 闇の王国様のエストポリス伝記攻略] - 各ダンジョンのマップがあります
 
 [http://www.lufia.net/classic/ Lufia NET] - 海外版エストのサイト
-
-= Details =
-
-Add your content here.  Format your content with:
-  * Text in *bold* or _italic_
-  * Headings, paragraphs, and lists
-  * Automatic links to other wiki pages
