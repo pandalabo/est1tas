@@ -1,8 +1,8 @@
 #summary Navigations, workthrough and data link
 
-== Link ==
+= Link =
 
-=Navigations and Data= 
+==Navigations and Data== 
 
 [http://www.rpgdl.org/sfc/est1.html RPG Data Library - エストポリス伝記] -チャート＋お店データが充実
 
@@ -16,6 +16,6 @@
 
 [http://www.lufia.net/classic/ Lufia NET] - 海外版エストのサイト
 
-=Emulator=
+==Emulator==
 
 [http://code.google.com/p/snes9x-rr/ Snes9x 1.43 rerecording v17]
