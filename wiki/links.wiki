@@ -1,6 +1,8 @@
-#summary texts and data links
+#summary Navigations, workthrough and data link
 
-= Links =
+== Link ==
+
+=Navigations and Data= 
 
 [http://www.rpgdl.org/sfc/est1.html RPG Data Library - エストポリス伝記] -チャート＋お店データが充実
 
@@ -13,3 +15,7 @@
 [http://www.geocities.co.jp/Playtown/1377/sfc/00/index01.html 闇の王国様のエストポリス伝記攻略] - 各ダンジョンのマップがあります
 
 [http://www.lufia.net/classic/ Lufia NET] - 海外版エストのサイト
+
+=Emulator=
+
+[http://code.google.com/p/snes9x-rr/ Snes9x 1.43 rerecording v17]
