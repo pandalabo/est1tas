@@ -16,6 +16,8 @@
 
 [http://www.lufia.net/classic/ Lufia NET] - 海外版エストのサイト
 
+[http://tasvideos.org/forum/viewtopic.php?t=8177 TASVideos.org forum] - Lufia testrun作者の書き込み。解析した内容などについて書かれています。] 
+
 ==Emulator==
 
 [http://code.google.com/p/snes9x-rr/ Snes9x 1.43 rerecording v17]
