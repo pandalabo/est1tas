@@ -16,7 +16,7 @@
 
 [http://www.lufia.net/classic/ Lufia NET] - 海外版エストのサイト
 
-[http://tasvideos.org/forum/viewtopic.php?t=8177 TASVideos.org forum] - Lufia testrun作者の書き込み。解析した内容などについて書かれています。
+[http://tasvideos.org/forum/viewtopic.php?t=8177 TASVideos.org forum] - Lufia testrun作者様zidanaxの書き込み。解析した内容などについて書かれています。
 
 ==Emulator==
 
@@ -26,7 +26,7 @@
 
 英語日本語のテキスト量の差や、バグ使用の有無があるので、あくまで参考
 
-[http://archive.org/details/LufiaAndTheFortressOfDoom_tas_testrun1_zidanax Lufia & the fortress of doom TAS testrun]
+[http://archive.org/details/LufiaAndTheFortressOfDoom_tas_testrun1_zidanax Lufia & the fortress of doom TAS testrun by zidanax]
 
 [http://speeddemosarchive.com/Lufia.html LufiaSpeedrun - posted on SDA]
 
