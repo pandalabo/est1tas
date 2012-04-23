@@ -9,9 +9,6 @@ Lufiaのメモリアドレスとは一部違うみたいなので注意。
 ||敵1匹目の属性||$7EE521 ||Lufiaの情報のため未検証||
 
 
-= Details =
+= link =
 
-Add your content here.  Format your content with:
-  * Text in *bold* or _italic_
-  * Headings, paragraphs, and lists
-  * Automatic links to other wiki pages
+[http://www.gamefaqs.com/boards/588452-lufia-and-the-fortress-of-doom/55054206 敵の情報についてのスレッド]
