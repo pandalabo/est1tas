@@ -1,7 +1,7 @@
 ==MENU==
 
-RNG(乱数)
+[rng RNG(乱数)]
 
-Memory Address
+[memory Memory Address]
 
-Link
+[link Link]
