@@ -1,13 +1,12 @@
-#summary One-sentence summary of this page.
+#summary about Random Number Generator
 
-= RNG(乱数生成器)について =
+== RNG(乱数生成器)について ==
 
-Add your content here.
+どうもエスト1の乱数はエスト2とほぼ同じらしいですね。 エスト2のほうはかなり解析されてるみたいなので、完成版作成までに内容確認します。
 
+===エスト2TAS作者のコメント引用===
+_Gunty wrote:_
 
-= Details =
+_ The RNG produces 55 number between 0 and 255 (or 00-FF) at a time. The initial values are always the same when starting the rom, and cannot be manipulated at all. These random numbers are stored in the memory addresses 7E0521-7E0557._
 
-Add your content here.  Format your content with:
-  * Text in *bold* or _italic_
-  * Headings, paragraphs, and lists
-  * Automatic links to other wiki pages
+_Everytime a random number is 'used' by the game, an internal counter, located at 7E0559, increments by 1. This counter starts at 0 and if it reaches 54 all random numbers have been used once. If another random number is requested, the RNG produces a new set of 55 random numbers. The way this happens is through bitwise XOR operations. random number 'i' becomes 'i' XOR 'i+31' and so on._
