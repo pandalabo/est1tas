@@ -1,7 +1,7 @@
 ==MENU==
 
-[rng RNG(乱数)]
+[rng.wiki RNG(乱数)]
 
-[memory Memory Address]
+[memory.wiki Memory Address]
 
-[link Link]
+[link.wiki Link]
