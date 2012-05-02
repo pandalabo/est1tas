@@ -11,8 +11,8 @@ local search_count = 0 --初期フレームからの試行回数
 
 --調査の限界
 --超過した場合、遅すぎるので中断（手動戦闘結果より遅かったら意味がない）
-local max_frame = 413000 --戦闘終了時（敵HPが0になった瞬間）の基準フレーム
-local max_search = 80 --戦闘開始を遅らせて試行を始める最大フレーム数
+local max_frame = 14000 --戦闘終了時（敵HPが0になった瞬間）の基準フレーム
+local max_search = 100 --戦闘開始を遅らせて試行を始める最大フレーム数
 
 local try_count = 200 --1つの戦闘開始フレームに対し、BOT戦闘を試行する回数
 
@@ -32,7 +32,6 @@ math.randomseed(os.time())
 state = savestate.create(5) --ステートを作成
 
 emu.speedmode("maximum")
---emu.speedmode("turbo")
 --emu.speedmode("nothrottle")
 --emu.speedmode("normal") --test use
 
@@ -104,7 +103,7 @@ function power_drug01()
 	fadv(2)
 	joypad.set(1,{A=true})
 	fadv(4)
-	joypad.set(1,{right=true})
+	joypad.set(1,{down=true})
 	fadv(2)
 	joypad.set(1,{A=true})
 	fadv(3)
@@ -130,7 +129,7 @@ function miracle_01()
 	fadv(2)
 	joypad.set(1,{A=true})
 	fadv(4)
-	joypad.set(1,{right=true})
+	joypad.set(1,{down=true})
 	fadv(2)
 	joypad.set(1,{A=true})
 	fadv(3)
@@ -145,50 +144,23 @@ function miracle_02()
 	fadv(2)
 	joypad.set(1,{A=true})
 	fadv(4)
+	joypad.set(1,{right=true})
+	fadv(2)
+	joypad.set(1,{A=true})
+	fadv(3)
+end
+
+function statue_03()
+	joypad.set(1,{A=true,up=true})
+	fadv(5)	--一覧ロード時間に若干差がある？ため1フレーム余裕を持たせる
+	joypad.set(1,{down=true})
+	fadv(2)
 	joypad.set(1,{down=true})
 	fadv(2)
 	joypad.set(1,{A=true})
-	fadv(3)
-end
-
-local doren_count = 0	--ドレン使用回数に制限
---ドレン（ルフィア）
-function doren()
-
-	doren_count = doren_count + 1
-
-	joypad.set(1,{A=true,up=true})
-	fadv(5)	--一覧ロード時間に若干差がある？ため1フレーム余裕を持たせる
-	joypad.set(1,{up=true})
-	fadv(2)
-	joypad.set(1,{A=true})
 	fadv(4)
-	joypad.set(1,{A=true})
-	fadv(3)
-end
-
---エストナ（ルフィア）
-function estna_01()
-	joypad.set(1,{A=true,up=true})
-	fadv(5)	--一覧ロード時間に若干差がある？ため1フレーム余裕を持たせる
-	joypad.set(1,{A=true})
-	fadv(4)
-	joypad.set(1,{A=true})
-	fadv(3)
-end
-
---エストナ（ジュリナ）
-function estna_02()
-	joypad.set(1,{A=true,up=true})
-	fadv(5)	--一覧ロード時間に若干差がある？ため1フレーム余裕を持たせる
 	joypad.set(1,{right=true})
 	fadv(2)
-	joypad.set(1,{right=true})
-	fadv(2)
-	joypad.set(1,{up=true})
-	fadv(2)
-	joypad.set(1,{A=true})
-	fadv(4)
 	joypad.set(1,{A=true})
 	fadv(3)
 end
@@ -215,20 +187,25 @@ function pattern_00()
 	p3hp = memory.readword(0x7E1593)
 	p4hp_max = memory.readword(0x7E16F6)
 	p4hp = memory.readword(0x7E1595)
+	
+	--パーティの状態による判断（正常：0、まひ：+1、せきか：+2、どく：+16、戦闘不能：+32、ムージル：+64）
+	p1st = memory.readbyte(0x7E158B) --主人公状態
+	p2st = memory.readbyte(0x7E158C) --ルフィア状態
+	p3st = memory.readbyte(0x7E158D) --アグロス状態
+	p4st = memory.readbyte(0x7E158E) --ジュリナ状態
 
-	r = math.random(5)
+	r = math.random(3)
 	if r == 1 then
-		--ジュリナが倒れていた場合
-		if p4hp == 0 then
-			miracle_02()
-		else
-			pattern_00()	--再度行動選択
-		end
-		
-	elseif r == 2 then
 		--アグロスが倒れていた場合
 		if p3hp == 0 then
 			miracle_01()
+		else
+			pattern_00()	--再度行動選択
+		end
+	elseif r == 2 then
+		--ジュリナが石化していない場合
+		if p4st%4 == 0 then
+			statue_03()
 		else
 			pattern_00()	--再度行動選択
 		end
@@ -240,66 +217,7 @@ end
 --ルフィアの行動
 function pattern_01()
 
-	--パーティのHPによる判断
-	p1hp_max = memory.readword(0x7E16F0)
-	p1hp = memory.readword(0x7E158F)
-	p2hp_max = memory.readword(0x7E16F2)
-	p2hp = memory.readword(0x7E1591)
-	p3hp_max = memory.readword(0x7E16F4)
-	p3hp = memory.readword(0x7E1593)
-	p4hp_max = memory.readword(0x7E16F6)
-	p4hp = memory.readword(0x7E1595)
-	
-	--パーティの状態による判断（正常：0、まひ：+1、せきか：+2、どく：+16、戦闘不能：+32、ムージル：+64）
-	p1st = memory.readbyte(0x7E158B) --主人公状態
-	p2st = memory.readbyte(0x7E158C) --ルフィア状態
-	p3st = memory.readbyte(0x7E158D) --アグロス状態
-	p4st = memory.readbyte(0x7E158E) --ジュリナ状態
-	
-	--PT全員のHPが半分より減っている場合はエストナを使用する確率を上げる
-	if p1hp_max - p1hp > p1hp_max / 2 and p2hp_max - p2hp > p2hp_max / 2 and p3hp_max - p3hp > p3hp_max / 2 and p4hp_max - p4hp > p4hp_max / 2 then
-		r = math.random(2)
-		if r == 1 then
-			if p2st < 64 then	--ムージルの状態でない
-				estna_01()
-				return
-			end
-		end
-	end	
-
-	r = math.random(6)
-	if r == 1 then
-		--主人公が生きていればパワードラッグを使用（3回まで）
-		if p1hp > 0 and power_drug00_count < 3 then
-			power_drug00()	
-		else
-			pattern_01() --再度行動選択
-		end
-	elseif r == 2 then
-		--アグロスが生きていればパワードラッグを使用（3回まで）
-		if p3hp > 0 and power_drug01_count < 3 then
-			power_drug01()	
-		else
-			pattern_01() --再度行動選択
-		end
-	elseif r == 3 then
-		--ドレンは2回まで、ムージルの状態でない
-		if doren_count < 2 and  p2st < 64 then
-			doren()
-		else
-			pattern_01() --再度行動選択
-		end
-	elseif r == 4 then
-		weapon_attack()
-	elseif r == 5 then
-		if p2st < 64 then	--ムージルの状態でない
-			estna_01()
-		else
-			pattern_01() --再度行動選択
-		end
-	else
-		guard()
-	end
+	guard()
 	
 end
 
@@ -334,22 +252,26 @@ function pattern_02()
 	end
 
 	r = math.random(6)
-	if r == 1 then
-		miracle_00()
-	elseif r == 2 then
-		miracle_02()
-	elseif r == 3 then
+	if r == 1 or r == 2 then
 		--主人公が生きていればパワードラッグを使用（3回まで）
-		if p1hp > 0 and power_drug00_count < 3 then
+		if p1hp > 0 and power_drug00_count < 4 then
 			power_drug00()	
 		else
-			pattern_03()	--再度行動選択
+			pattern_02()	--再度行動選択
 		end
+	elseif r == 3 then
+	--アグロスが生きていればパワードラッグを使用（3回まで）
+		if p3hp > 0 and power_drug01_count < 4 then
+			power_drug01()	
+		else
+			pattern_02()	--再度行動選択
+		end
+	elseif r == 4 then
+		guard()
 	else
 		weapon_attack()
 	end
 end
---なぜかたまにアグロスが指定動作以外のことをする・・・⇒課題
 
 --ジュリナの行動
 function pattern_03()
@@ -404,10 +326,6 @@ function pattern_03()
 		end
 	elseif r == 3 then
 		weapon_attack()
-	elseif r == 4 then
-		miracle_00()
-	elseif r == 5 then
-		miracle_01()
 	else
 		guard()
 	end
@@ -420,8 +338,8 @@ function input_command()
 	
 	--[[
 		以下の隊列の場合
-		00:主人公	01:アグロス
-		02:ジュリナ	欠員（03:ルフィア）
+		00:主人公	01:ジュリナ
+		02:アグロス	欠員（03:ルフィア）
 	]]
 	--主人公のターン
 	if turn == 0 then
@@ -434,12 +352,12 @@ function input_command()
 	end
 	
 	--アグロスのターン
-	if turn == 1 then
+	if turn == 2 then
 		pattern_02()
 	end
 	
 	--ジュリナのターン
-	if turn == 2 then
+	if turn == 1 then
 		pattern_03()
 	end
 
@@ -476,7 +394,7 @@ function failure()
 	
 	
 	--全員が倒れた場合、失敗
-	if p1hp == 0 and p3hp == 0 and p4hp == 0 then	--ルフィアは抜けているため除外
+	if p1hp == 0 and p3hp == 0 and (p4hp == 0 or p4st%4 == 2) then	--ルフィアは抜けているため除外
 		fail_flag = true
 	end
 		
@@ -556,7 +474,6 @@ function success()
 	p3hp = memory.readword(0x7E1593)
 	p4hp_max = memory.readword(0x7E16F6)
 	p4hp = memory.readword(0x7E1595)
-	
 	if p1hp == 0 or p3hp == 0 or p4hp == 0 then
 		return false
 	end

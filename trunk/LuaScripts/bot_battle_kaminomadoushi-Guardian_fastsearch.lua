@@ -12,7 +12,7 @@ local search_count = 0 --初期フレームからの試行回数
 --調査の限界
 --超過した場合、遅すぎるので中断（手動戦闘結果より遅かったら意味がない）
 local max_frame = 413000 --戦闘終了時（敵HPが0になった瞬間）の基準フレーム
-local max_search = 80 --戦闘開始を遅らせて試行を始める最大フレーム数
+local max_search = 100 --戦闘開始を遅らせて試行を始める最大フレーム数
 
 local try_count = 200 --1つの戦闘開始フレームに対し、BOT戦闘を試行する回数
 
@@ -37,16 +37,7 @@ emu.speedmode("maximum")
 --emu.speedmode("normal") --test use
 
 local result = false
-
---戦闘状況
-local total_battle = 0
-local win = 0
-local total_damage = 0
-local total_damage_inthistry = 0
-local enhp_max = 0
-local enhp_max_r = 99999
-local max_damage = 0
-local max_damage_inthistry = 0
+local retry = false --maxフレーム超過した場合にtrue、戦闘失敗扱いにする
 
 --frameadvance( n time(s))
 function fadv(n)
@@ -218,20 +209,7 @@ function pattern_00()
 
 	r = math.random(5)
 	if r == 1 then
-		--ジュリナが倒れていた場合
-		if p4hp == 0 then
-			miracle_02()
-		else
-			pattern_00()	--再度行動選択
-		end
-		
-	elseif r == 2 then
-		--アグロスが倒れていた場合
-		if p3hp == 0 then
-			miracle_01()
-		else
-			pattern_00()	--再度行動選択
-		end
+		weapon_attack()
 	else 
 		weapon_attack()
 	end
@@ -256,18 +234,7 @@ function pattern_01()
 	p3st = memory.readbyte(0x7E158D) --アグロス状態
 	p4st = memory.readbyte(0x7E158E) --ジュリナ状態
 	
-	--PT全員のHPが半分より減っている場合はエストナを使用する確率を上げる
-	if p1hp_max - p1hp > p1hp_max / 2 and p2hp_max - p2hp > p2hp_max / 2 and p3hp_max - p3hp > p3hp_max / 2 and p4hp_max - p4hp > p4hp_max / 2 then
-		r = math.random(2)
-		if r == 1 then
-			if p2st < 64 then	--ムージルの状態でない
-				estna_01()
-				return
-			end
-		end
-	end	
-
-	r = math.random(6)
+	r = math.random(5)
 	if r == 1 then
 		--主人公が生きていればパワードラッグを使用（3回まで）
 		if p1hp > 0 and power_drug00_count < 3 then
@@ -291,12 +258,6 @@ function pattern_01()
 		end
 	elseif r == 4 then
 		weapon_attack()
-	elseif r == 5 then
-		if p2st < 64 then	--ムージルの状態でない
-			estna_01()
-		else
-			pattern_01() --再度行動選択
-		end
 	else
 		guard()
 	end
@@ -317,34 +278,25 @@ function pattern_02()
 	p4hp = memory.readword(0x7E1595)
 
 	--主人公、ジュリナが倒れている場合はミラクロースを使用する確率を上げる
-	if p1hp == 0 then
-		r = math.random(3)
-		if r >= 2 then
-			miracle_00()
-			return
-		end
-	end
+	-- if p1hp == 0 then
+		-- r = math.random(3)
+		-- if r >= 2 then
+			-- miracle_00()
+			-- return
+		-- end
+	-- end
 	
-	if p4hp == 0 then
-		r = math.random(3)
-		if r >= 2 then
-			miracle_02()
-			return
-		end
-	end
+	-- if p4hp == 0 then
+		-- r = math.random(3)
+		-- if r >= 2 then
+			-- miracle_02()
+			-- return
+		-- end
+	-- end
 
 	r = math.random(6)
 	if r == 1 then
-		miracle_00()
-	elseif r == 2 then
-		miracle_02()
-	elseif r == 3 then
-		--主人公が生きていればパワードラッグを使用（3回まで）
-		if p1hp > 0 and power_drug00_count < 3 then
-			power_drug00()	
-		else
-			pattern_03()	--再度行動選択
-		end
+		weapon_attack()
 	else
 		weapon_attack()
 	end
@@ -371,23 +323,23 @@ function pattern_03()
 	p4st = memory.readbyte(0x7E158E) --ジュリナ状態
 		
 	--主人公、アグロスが倒れている場合はミラクロースを使用する確率を上げる
-	if p1hp == 0 then
-		r = math.random(3)
-		if r >= 2 then
-			miracle_00()
-			return
-		end
-	end
+	-- if p1hp == 0 then
+		-- r = math.random(3)
+		-- if r >= 2 then
+			-- miracle_00()
+			-- return
+		-- end
+	-- end
 	
-	if p3hp == 0 then
-		r = math.random(3)
-		if r >= 2 then
-			miracle_01()
-			return
-		end
-	end
+	-- if p3hp == 0 then
+		-- r = math.random(3)
+		-- if r >= 2 then
+			-- miracle_01()
+			-- return
+		-- end
+	-- end
 
-	r = math.random(6)
+	r = math.random(4)
 	if r == 1 then
 		--主人公が生きていればパワードラッグを使用（3回まで）
 		if p1hp > 0 and power_drug00_count < 3 then
@@ -404,10 +356,6 @@ function pattern_03()
 		end
 	elseif r == 3 then
 		weapon_attack()
-	elseif r == 4 then
-		miracle_00()
-	elseif r == 5 then
-		miracle_01()
 	else
 		guard()
 	end
@@ -421,7 +369,7 @@ function input_command()
 	--[[
 		以下の隊列の場合
 		00:主人公	01:アグロス
-		02:ジュリナ	欠員（03:ルフィア）
+		02:ルフィア	03:ジュリナ
 	]]
 	--主人公のターン
 	if turn == 0 then
@@ -429,7 +377,7 @@ function input_command()
 	end
 	
 	--ルフィアのターン
-	if turn == 3 then
+	if turn == 2 then
 		pattern_01()
 	end
 	
@@ -439,7 +387,7 @@ function input_command()
 	end
 	
 	--ジュリナのターン
-	if turn == 2 then
+	if turn == 3 then
 		pattern_03()
 	end
 
@@ -475,8 +423,8 @@ function failure()
 	p4st = memory.readbyte(0x7E158E) --ジュリナ状態
 	
 	
-	--全員が倒れた場合、失敗
-	if p1hp == 0 and p3hp == 0 and p4hp == 0 then	--ルフィアは抜けているため除外
+	--誰かが倒れた場合、失敗
+	if p1hp == 0 or p2hp == 0 or p3hp == 0 or p4hp == 0 then
 		fail_flag = true
 	end
 		
@@ -511,8 +459,6 @@ function attempt()
 		end
 	end
 	
-	enhp_max = memory.readword(0x7EE542) --敵1HP
-	
 	--戦闘中の判定
 	local loop = true
 	while loop do
@@ -546,21 +492,7 @@ end
 
 --bot成功判定 
 function success()
-	
-	--撃破時に誰かが倒れていた場合、失敗
-	p1hp_max = memory.readword(0x7E16F0)
-	p1hp = memory.readword(0x7E158F)
-	p2hp_max = memory.readword(0x7E16F2)
-	p2hp = memory.readword(0x7E1591)
-	p3hp_max = memory.readword(0x7E16F4)
-	p3hp = memory.readword(0x7E1593)
-	p4hp_max = memory.readword(0x7E16F6)
-	p4hp = memory.readword(0x7E1595)
-	
-	if p1hp == 0 or p3hp == 0 or p4hp == 0 then
-		return false
-	end
-	
+		
 	return result
 end
 
@@ -580,62 +512,23 @@ while true do
 		savestate.load(state)
 		fadv(search_count)	--試行フレームまで進める
 		
-		total_battle = total_battle + 1
 		attempt()	--戦闘
-		
-		total_damage = total_damage + enhp_max - memory.readword(0x7EE542)
-		total_damage_inthistry = total_damage_inthistry + enhp_max - memory.readword(0x7EE542)
-		
-		--最大与ダメ記録の更新
-		if enhp_max_r - max_damage > memory.readword(0x7EE542) then
-			max_damage = enhp_max - memory.readword(0x7EE542)
-			enhp_max_r = enhp_max
-		end
-		
-		if enhp_max - memory.readword(0x7EE542) > max_damage_inthistry then
-			max_damage_inthistry = enhp_max - memory.readword(0x7EE542)
-		end
-		
-		--与ダメ一定以上の場合、戦譜をファイルに書き出し　（勝率が低いボス用に後で検証するため）
-		if enhp_max - memory.readword(0x7EE542) > 5000 then
-		
-			local state_ = savestate.create(8)
-			savestate.save(state_) --善戦を保存
-			print("nearly won, saved state at 8")
-			
-			-- file = io.open("nazeby_br.txt", "a+")
-			-- file:write("--------------------------------------------------------\n")
-			-- file:write(os.date("%Y-%m-%d %H:%M:%S") .. "\n")
-			-- file:write("try frame: " .. beginning_frame-1+search_count .. "　"
-				-- .. "damage:" .. enhp_max - memory.readword(0x7EE542) .. " "
-				-- .. "time:" .. emu.framecount() - beginning_frame .. " frames" .. "\n" )
-			-- file:write("hero:" .. brec_hero .. "\n")
-			-- file:write("lufia:" .. brec_lufia .. "\n")
-			-- file:write("aguro:" .. brec_aguro .. "\n")
-			-- file:write("jerin:" .. brec_jerin .. "\n")
-			-- file:close()
-			
-		end
-		
-		brec_hero, brec_lufia, brec_aguro, brec_jerin = "", "", "", ""
 		
 		--成功？か判断し、成功状態を保存する
 		if success() then
 			
-			win = win + 1
-			
+			local state_good = savestate.create(6)
+			savestate.save(state_good)	--成功状態を保存
+		
 			if emu.framecount() < best_frame then
 				local state_best = savestate.create(7)
 				savestate.save(state_best) --最短を保存
 				
 				best_frame = emu.framecount()
-				max_frame = best_frame + 60	--今後の探索では最短結果より遅い場合打ち切る
+				max_frame = best_frame	--今後の探索では最短結果より遅い場合打ち切る
 				
 				print("best state is saved, framecount: " .. best_frame 
 					.."(+ wait:" .. search_count .. ", battle:" .. best_frame - beginning_frame - search_count .. ")" )
-			else
-				local state_good = savestate.create(6)
-				savestate.save(state_good)	--成功状態を保存
 			end
 			
 		end
@@ -644,23 +537,13 @@ while true do
 
 	end
 	
-	print("max:" .. max_damage .. "/" .. enhp_max_r .. "(this try: ".. max_damage_inthistry .. ")"
-			.. ", ave:" .. math.floor(total_damage / total_battle)
-			.. "(at " .. beginning_frame-1+search_count .."f:" .. math.floor(total_damage_inthistry/try_count) .. ")"
-			.. ", win/battle:" .. win .. "/" .. total_battle
-			.. ", win-rate:" .. string.format("%.2f", win/total_battle*100))
-			
-	total_damage_inthistry = 0	--あるフレームでのダメージ合計をリセット
-	max_damage_inthistry = 0 --あるフレームでの最大ダメージをリセット
-	
-	--次フレームでの探索のためフレームを進める
 	search_count = search_count + 1			
 	
-	--基準フレーム超過で探索終了
 	if search_count > max_search then
 		print("search end, for excess of max_search")
 		break
 	end
+	
 	
 end
 

@@ -11,8 +11,8 @@ local search_count = 0 --初期フレームからの試行回数
 
 --調査の限界
 --超過した場合、遅すぎるので中断（手動戦闘結果より遅かったら意味がない）
-local max_frame = 413000 --戦闘終了時（敵HPが0になった瞬間）の基準フレーム
-local max_search = 80 --戦闘開始を遅らせて試行を始める最大フレーム数
+local max_frame = 30000 --戦闘終了時（敵HPが0になった瞬間）の基準フレーム
+local max_search = 200 --戦闘開始を遅らせて試行を始める最大フレーム数
 
 local try_count = 200 --1つの戦闘開始フレームに対し、BOT戦闘を試行する回数
 
@@ -26,8 +26,11 @@ local best_frame = 9999999
 movie.rerecordcounting(false)
 print("re-recordcount: " .. movie.rerecordcount())
 
+--use Mersenne Twister RNG, cuz math.rand from C Library is a bad algorithm
+require "mt19937"
+
 --現在時刻で乱数を初期化
-math.randomseed(os.time())
+mt19937.randomseed(os.time())
 
 state = savestate.create(5) --ステートを作成
 
@@ -104,7 +107,7 @@ function power_drug01()
 	fadv(2)
 	joypad.set(1,{A=true})
 	fadv(4)
-	joypad.set(1,{right=true})
+	joypad.set(1,{down=true})
 	fadv(2)
 	joypad.set(1,{A=true})
 	fadv(3)
@@ -130,7 +133,7 @@ function miracle_01()
 	fadv(2)
 	joypad.set(1,{A=true})
 	fadv(4)
-	joypad.set(1,{right=true})
+	joypad.set(1,{down=true})
 	fadv(2)
 	joypad.set(1,{A=true})
 	fadv(3)
@@ -145,34 +148,8 @@ function miracle_02()
 	fadv(2)
 	joypad.set(1,{A=true})
 	fadv(4)
-	joypad.set(1,{down=true})
+	joypad.set(1,{right=true})
 	fadv(2)
-	joypad.set(1,{A=true})
-	fadv(3)
-end
-
-local doren_count = 0	--ドレン使用回数に制限
---ドレン（ルフィア）
-function doren()
-
-	doren_count = doren_count + 1
-
-	joypad.set(1,{A=true,up=true})
-	fadv(5)	--一覧ロード時間に若干差がある？ため1フレーム余裕を持たせる
-	joypad.set(1,{up=true})
-	fadv(2)
-	joypad.set(1,{A=true})
-	fadv(4)
-	joypad.set(1,{A=true})
-	fadv(3)
-end
-
---エストナ（ルフィア）
-function estna_01()
-	joypad.set(1,{A=true,up=true})
-	fadv(5)	--一覧ロード時間に若干差がある？ため1フレーム余裕を持たせる
-	joypad.set(1,{A=true})
-	fadv(4)
 	joypad.set(1,{A=true})
 	fadv(3)
 end
@@ -193,11 +170,55 @@ function estna_02()
 	fadv(3)
 end
 
+
+local mirror_00_count = 0 --ミラール経過ターン制御（2ターンは同キャラにかけない）
+
+--ミラール⇒No.00（主人公）
+function mirror_00()
+	joypad.set(1,{A=true,up=true})
+	fadv(5)	--一覧ロード時間に若干差がある？ため1フレーム余裕を持たせる
+	joypad.set(1,{A=true})
+	fadv(4)
+	joypad.set(1,{A=true})
+	fadv(3)
+end
+
+local mirror_01_count = 0 --ミラール経過ターン制御（2ターンは同キャラにかけない）
+
+--ミラール⇒No.01（アグロス）
+function mirror_01()
+	joypad.set(1,{A=true,up=true})
+	fadv(5)	--一覧ロード時間に若干差がある？ため1フレーム余裕を持たせる
+	joypad.set(1,{A=true})
+	fadv(4)
+	joypad.set(1,{right=true})
+	fadv(2)
+	joypad.set(1,{A=true})
+	fadv(3)
+end
+
+local mirror_02_count = 0 --ミラール経過ターン制御（2ターンは同キャラにかけない）
+
+--ミラール⇒No.02（ジュリナ）
+function mirror_02()
+	joypad.set(1,{A=true,up=true})
+	fadv(5)	--一覧ロード時間に若干差がある？ため1フレーム余裕を持たせる
+	joypad.set(1,{A=true})
+	fadv(4)
+	joypad.set(1,{down=true})
+	fadv(2)
+	joypad.set(1,{A=true})
+	fadv(3)
+end
+
 --戦闘ロジック用変数をリセット
 function reset_var()
 	power_drug00_count = 0
 	power_drug01_count = 0
-	doren_count = 0
+
+	mirror_00_count = 0
+	mirror_01_count = 0
+	mirror_02_count = 0
 end
 
 --各キャラの選択行動にはあまり状況判断ロジックを入れない
@@ -216,22 +237,9 @@ function pattern_00()
 	p4hp_max = memory.readword(0x7E16F6)
 	p4hp = memory.readword(0x7E1595)
 
-	r = math.random(5)
+	r = mt19937.random(5)
 	if r == 1 then
-		--ジュリナが倒れていた場合
-		if p4hp == 0 then
-			miracle_02()
-		else
-			pattern_00()	--再度行動選択
-		end
-		
-	elseif r == 2 then
-		--アグロスが倒れていた場合
-		if p3hp == 0 then
-			miracle_01()
-		else
-			pattern_00()	--再度行動選択
-		end
+		weapon_attack()
 	else 
 		weapon_attack()
 	end
@@ -240,67 +248,8 @@ end
 --ルフィアの行動
 function pattern_01()
 
-	--パーティのHPによる判断
-	p1hp_max = memory.readword(0x7E16F0)
-	p1hp = memory.readword(0x7E158F)
-	p2hp_max = memory.readword(0x7E16F2)
-	p2hp = memory.readword(0x7E1591)
-	p3hp_max = memory.readword(0x7E16F4)
-	p3hp = memory.readword(0x7E1593)
-	p4hp_max = memory.readword(0x7E16F6)
-	p4hp = memory.readword(0x7E1595)
-	
-	--パーティの状態による判断（正常：0、まひ：+1、せきか：+2、どく：+16、戦闘不能：+32、ムージル：+64）
-	p1st = memory.readbyte(0x7E158B) --主人公状態
-	p2st = memory.readbyte(0x7E158C) --ルフィア状態
-	p3st = memory.readbyte(0x7E158D) --アグロス状態
-	p4st = memory.readbyte(0x7E158E) --ジュリナ状態
-	
-	--PT全員のHPが半分より減っている場合はエストナを使用する確率を上げる
-	if p1hp_max - p1hp > p1hp_max / 2 and p2hp_max - p2hp > p2hp_max / 2 and p3hp_max - p3hp > p3hp_max / 2 and p4hp_max - p4hp > p4hp_max / 2 then
-		r = math.random(2)
-		if r == 1 then
-			if p2st < 64 then	--ムージルの状態でない
-				estna_01()
-				return
-			end
-		end
-	end	
+	guard()
 
-	r = math.random(6)
-	if r == 1 then
-		--主人公が生きていればパワードラッグを使用（3回まで）
-		if p1hp > 0 and power_drug00_count < 3 then
-			power_drug00()	
-		else
-			pattern_01() --再度行動選択
-		end
-	elseif r == 2 then
-		--アグロスが生きていればパワードラッグを使用（3回まで）
-		if p3hp > 0 and power_drug01_count < 3 then
-			power_drug01()	
-		else
-			pattern_01() --再度行動選択
-		end
-	elseif r == 3 then
-		--ドレンは2回まで、ムージルの状態でない
-		if doren_count < 2 and  p2st < 64 then
-			doren()
-		else
-			pattern_01() --再度行動選択
-		end
-	elseif r == 4 then
-		weapon_attack()
-	elseif r == 5 then
-		if p2st < 64 then	--ムージルの状態でない
-			estna_01()
-		else
-			pattern_01() --再度行動選択
-		end
-	else
-		guard()
-	end
-	
 end
 
 --アグロスの行動
@@ -317,33 +266,44 @@ function pattern_02()
 	p4hp = memory.readword(0x7E1595)
 
 	--主人公、ジュリナが倒れている場合はミラクロースを使用する確率を上げる
-	if p1hp == 0 then
-		r = math.random(3)
-		if r >= 2 then
+	if p1hp < p1hp_max/2 then
+		r = mt19937.random(3)
+		if r >= 3 then
 			miracle_00()
 			return
 		end
 	end
 	
+	if p3hp < p3hp_max/2 then
+		r = mt19937.random(3)
+		if r >= 2 then
+			miracle_01()
+			return
+		end
+	end
+	
 	if p4hp == 0 then
-		r = math.random(3)
+		r = mt19937.random(3)
 		if r >= 2 then
 			miracle_02()
 			return
 		end
 	end
-
-	r = math.random(6)
+	
+	r = mt19937.random(5)	
 	if r == 1 then
-		miracle_00()
-	elseif r == 2 then
-		miracle_02()
-	elseif r == 3 then
 		--主人公が生きていればパワードラッグを使用（3回まで）
-		if p1hp > 0 and power_drug00_count < 3 then
+		if p1hp > 0 and power_drug00_count < 4 then
 			power_drug00()	
 		else
-			pattern_03()	--再度行動選択
+			pattern_02()	--再度行動選択
+		end
+	elseif r == 2 then
+		--アグロスが生きていればパワードラッグを使用（3回まで）
+		if p3hp > 0 and power_drug01_count < 3 then
+			power_drug01()	
+		else
+			pattern_02()	--再度行動選択
 		end
 	else
 		weapon_attack()
@@ -371,8 +331,8 @@ function pattern_03()
 	p4st = memory.readbyte(0x7E158E) --ジュリナ状態
 		
 	--主人公、アグロスが倒れている場合はミラクロースを使用する確率を上げる
-	if p1hp == 0 then
-		r = math.random(3)
+	if p1hp < p1hp_max/2 then
+		r = mt19937.random(3)
 		if r >= 2 then
 			miracle_00()
 			return
@@ -380,14 +340,14 @@ function pattern_03()
 	end
 	
 	if p3hp == 0 then
-		r = math.random(3)
+		r = mt19937.random(3)
 		if r >= 2 then
 			miracle_01()
 			return
 		end
 	end
 
-	r = math.random(6)
+	r = mt19937.random(4)
 	if r == 1 then
 		--主人公が生きていればパワードラッグを使用（3回まで）
 		if p1hp > 0 and power_drug00_count < 3 then
@@ -404,10 +364,6 @@ function pattern_03()
 		end
 	elseif r == 3 then
 		weapon_attack()
-	elseif r == 4 then
-		miracle_00()
-	elseif r == 5 then
-		miracle_01()
 	else
 		guard()
 	end
@@ -420,11 +376,12 @@ function input_command()
 	
 	--[[
 		以下の隊列の場合
-		00:主人公	01:アグロス
-		02:ジュリナ	欠員（03:ルフィア）
+		00:主人公	01:ジュリナ
+		02:アグロス	欠員（03:ルフィア）
 	]]
 	--主人公のターン
 	if turn == 0 then
+		mirror_00_count = mirror_00_count - 1	--ミラール経過ターンのカウント
 		pattern_00()
 	end
 	
@@ -434,13 +391,15 @@ function input_command()
 	end
 	
 	--アグロスのターン
-	if turn == 1 then
+	if turn == 2 then
+		mirror_01_count = mirror_01_count - 1	--ミラール経過ターンのカウント
 		pattern_02()
 	end
 	
 	--ジュリナのターン
-	if turn == 2 then
-		pattern_03()
+	if turn == 1 then
+		mirror_02_count = mirror_02_count - 1	--ミラール経過ターンのカウント
+		pattern_03()		
 	end
 
 end
@@ -476,7 +435,7 @@ function failure()
 	
 	
 	--全員が倒れた場合、失敗
-	if p1hp == 0 and p3hp == 0 and p4hp == 0 then	--ルフィアは抜けているため除外
+	if p1hp == 0 and p3hp == 0 and (p4hp == 0 or p4st%4 == 2) then	--ルフィアは抜けているため除外
 		fail_flag = true
 	end
 		
@@ -545,22 +504,16 @@ function attempt()
 end
 
 --bot成功判定 
-function success()
-	
+function success()	
+
 	--撃破時に誰かが倒れていた場合、失敗
-	p1hp_max = memory.readword(0x7E16F0)
 	p1hp = memory.readword(0x7E158F)
-	p2hp_max = memory.readword(0x7E16F2)
 	p2hp = memory.readword(0x7E1591)
-	p3hp_max = memory.readword(0x7E16F4)
 	p3hp = memory.readword(0x7E1593)
-	p4hp_max = memory.readword(0x7E16F6)
 	p4hp = memory.readword(0x7E1595)
-	
-	if p1hp == 0 or p3hp == 0 or p4hp == 0 then
+	if p1hp < 200 or p3hp < 200 or p4hp == 0 then
 		return false
 	end
-	
 	return result
 end
 
@@ -599,11 +552,11 @@ while true do
 		--与ダメ一定以上の場合、戦譜をファイルに書き出し　（勝率が低いボス用に後で検証するため）
 		if enhp_max - memory.readword(0x7EE542) > 5000 then
 		
-			local state_ = savestate.create(8)
-			savestate.save(state_) --善戦を保存
-			print("nearly won, saved state at 8")
+			--local state_ = savestate.create(8)
+			--savestate.save(state_) --善戦を保存
+			--print("nearly won, saved state at 8")
 			
-			-- file = io.open("nazeby_br.txt", "a+")
+			-- file = io.open("Amon_br.txt", "a+")
 			-- file:write("--------------------------------------------------------\n")
 			-- file:write(os.date("%Y-%m-%d %H:%M:%S") .. "\n")
 			-- file:write("try frame: " .. beginning_frame-1+search_count .. "　"
