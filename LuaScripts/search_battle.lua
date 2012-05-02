@@ -28,8 +28,8 @@ end)
 while true do
 	if flag == 2 then
 	--待ち中であれば、Aを押し続ける
-	--joypad.set(1,{A=true})
-	joypad.set(1,{A=true,right=true})
+	joypad.set(1,{A=true})
+	--joypad.set(1,{A=true,right=true})
 		frame = emu.framecount()
 		search_count = search_count + 1
 		print("searching at " .. frame-1 .. "frame, count " .. search_count)
@@ -37,7 +37,7 @@ while true do
 		--ここに結果の判定方法を書く
 		
 		--一定フレーム待機
-		for i=0, 500 do
+		for i=0, 400 do
 			emu.frameadvance()
 		end
 		
@@ -46,8 +46,9 @@ while true do
 		en2hp = memory.readword(0x7ee5C2)
 		en3hp = memory.readword(0x7ee642)
 		en4hp = memory.readword(0x7ee6C2)
+		drop = memory.readbyte(0x7e1430)
 		
-		if  en2hp == 0 then
+		if  en1hp == 0 and drop == 226 then
 			flag = 3 --乱数調整終了
 		else
 			flag = 0 --フラグをやり直しにする
