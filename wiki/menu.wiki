@@ -4,6 +4,8 @@
 
 [memory Memory Address]
 
+[strategy Strategy]
+
 [link Link]
 
 [glitch Glitch]
