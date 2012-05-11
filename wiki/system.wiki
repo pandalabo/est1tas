@@ -4,8 +4,8 @@
 
 ==基本ステータス(base status)==
 ||Stat||Meaning||effects||
-||ATP||STR + Weapon ATP||increases damage by Attack||
-||DFP||STR/4(round down) + AGL/4(round down) + Armar DFP + Shield DFP + Helmet DFP||decrease damage by Attack/Physical Skill/Item||
+||ATP||STR + Weapon/Ring ATP||increases damage by Attack||
+||DFP||STR/4(round down) + AGL/4(round down) + protectors/Ring DFP||decrease damage by Attack/Physical Skill/Item||
 ||
 ||STR||strength, increases by level up/stat potion(みなもと)||added to ATP||
 ||AGL||how fast the charactor's turn comes||next turn comes quickly, No detail||
