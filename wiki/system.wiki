@@ -29,9 +29,9 @@ AGLと装備重量がどの程度影響するかの詳細は不明。
 
 ==ステータス変動(status bonus)==
 
-変動値 = 基本ステータス値 '*' 変動率[%] / 2 '*' [乱数]  - 使用前のステ変動値 / 変動率[%]
+変動値 = 基本ステータス値 '*' 変動率 / 2 '*' [乱数]  - 使用前のステ変動値 / 変動率
 
-[stat bonus gain] = ( [Basic stat value] '*' [effect rate] / 2 '*' [random rate] ) - [current stat bonus] / [effect rate]
+'['stat bonus gain']' = ( '['Basic stat value']' '*' '['effect rate']' / 2 '*' '['random rate']' ) - '['current stat bonus']' / '['effect rate']'
 
 変動値は2キャラクターが行動・もしくは変動しているキャラが行動するごとに12.5%減衰する。
 
