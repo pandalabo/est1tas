@@ -1,5 +1,7 @@
 ==MENU==
 
+[system Basic System] 
+
 [rng RNG(乱数)]
 
 [memory Memory Address]
