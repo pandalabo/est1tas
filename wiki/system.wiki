@@ -37,7 +37,14 @@ AGLと装備重量がどの程度影響するかの詳細は不明。
 
 e.g.
 ||Spell/Item||Effect Rate[%]||
+||ラム(Pear CIder)||7||
+||ウォッカ(Sour Cider)||20||
+||ジン(Lime Cider)||26||
+||リキュール(Plum Cider)||38||
+||タプローズ(Apple Cider)||50||
 ||トゥイーク(Trick)||50||
+||パワードラッグ(Power Gourd)||57||
 ||ディレクト(Courage)||60||
+||ドレン(Drain)||-80||
 ||ドリッド(Dread)||-66||
 ||フェイク(Fake)||45||
