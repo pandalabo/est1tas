@@ -1,0 +1,35 @@
+#summary Lufia Glitches, some are only in Japanese ver.
+
+= Glitches =
+
+==Common==
+
+===Purple Newt Cave skip===
+
+===slip out ocean stream===
+
+Press "B" to open camp menu when you are on an ocean stream. then "B" to close menu with pressing any D-pad key. you will escape from the stream to the direction of the D-pad. you can use this glitch to reverse sailing.
+
+==JAP only==
+
+===Carry over Maxim's items===
+
+As a result of this glitch, you will have some of items Maxim's party had at the beginning of the game. It happens at the end of the prologue(after defeating Daos) if Maxim's party have more than 30 items.
+ The program delete first 30 items(30 item slots) and leave some items from the 31th. A simple way to use this glitch is get 5 treasure boxs which contain stat-up potion, then you can carry over 6 items to 99 years after. In addition, you can get Might Sword and Hi-Potion from Hydra and Efreet. So with this 2 items, you could send 8 items to Hero, including Might Sword(it's the strongest Weapon). Moreover, when Hero's age starts,  you can duplicate these carry-over items up to 34 item slots for opening-closing camp menu.
+
+Among many other items, these items below are really useful.
+
+・Might Sword (ATP +380)
+
+・Miracle (the amount is 87)
+
+
+This glitch is absolutely effective and saves a lot of time.
+For the beginning part, Hero's party can easily defeat the first few bosses at few hits.
+For the middle to the end, you don't need to buy/pickup most of Equipments or Items.
+
+===Hero's ATP UP 1===
+
+
+
+===Hero's ATP UP 2===
