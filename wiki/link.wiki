@@ -18,7 +18,7 @@
 
 [http://www.lufia.net/classic/ Lufia.net classic] - 海外版エストのサイト
 
-[http://tasvideos.org/forum/viewtopic.php?t=8177 TASVideos.org forum topic about lufia] - Lufia testrun作者様zidanaxの立てたLufia1のトピック。先行研究などの一部が確認できる。
+[http://tasvideos.org/forum/viewtopic.php?t=8177 TASVideos.org forum / topic about lufia] - Lufia testrun作者様zidanaxの立てたLufia1のトピック。先行研究などの一部が確認できる。
 
 ==Emulator==
 
