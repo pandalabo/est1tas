@@ -55,8 +55,7 @@ _Everytime a random number is 'used' by the game, an internal counter, located a
 ===Dungeon===
 ===Battle===
 
-・when a monster moves - wobbling
+・monster moving - wobbling
 
 モンスターグラフィックが動くものと動かないものがいる。動くものの場合、動くことによって乱数が消費される。
 私が勝手にモンスターの「揺れ」と言っていたものをLufiaTASの作者は"wobbling"といっているので、今度からそう呼ぶことにしました。
-
