@@ -59,3 +59,23 @@ _Everytime a random number is 'used' by the game, an internal counter, located a
 
 モンスターグラフィックが動くものと動かないものがいる。動くものの場合、動くことによって乱数が消費される。
 私が勝手にモンスターの「揺れ」と言っていたものをLufiaTASの作者は"wobbling"といっているので、今度からそう呼ぶことにしました。
+
+==確率==
+
+===ドロップ率===
+
+zidanax said:
+_here's what I'm getting from my Hex Editor (the probabilities range from 0 to 255, higher means likelier) :
+Wing Lion (drops Spell Potion): 5
+Manticore (drops Mind Potion): 2
+Werefrog (drops Great Potion): 2
+
+For comparison, drop rates for Might equipment:
+Might Sword (from Hydra):1
+Might Helmet (from Barient):2
+Might Armor (from Fire Plate):2
+
+To get a sense of how rare those drops are, here are some more common ones:
+Mid Arrow (from Kobold):76
+Grilled Newt (from Big Newt):25
+Long Nail (from Straw Man):66_
