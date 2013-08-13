@@ -1,11 +1,16 @@
-require "mylib9x"
+require "mylib"
 
 local enccount
+local penc
 local encrate
+local en1hp
 local engrp = {}
 local rand
 local rand2
 local inbattle
+local enemy_count = 0
+
+local movielen
 
 function display_all()
 		
@@ -16,40 +21,40 @@ function display_all()
 	end
 	gui.text(60,1, frame_to_timestr(emu.framecount()))
 
-	rand = memory.readbyte(0x7e14ae)
+	rand = memory.readbyte(0x7E149E)
 	rand2 = memory.readbyte(0x7e1476)
 	
-	gui.text(216,  1, "rnd indx:" .. string.format("%02d", rand))
-	gui.text(216,  8, "r01:" .. string.format("%02x", rand2))
+	gui.text(200,  1, "rand index:" .. string.format("%02d", rand))
+	--gui.text(216,  8, "rand2:" .. string.format("%02x", rand2))
 	
 	-- display random number & encounter count
 	
 	enccount = memory.readbyte(0x7e078c)
 	encrate = memory.readbyte(0x7e16c5)
 	
-	gui.text(200, 216, "enc_rate:" .. encrate)
-	gui.text(200, 208, "encounter:" .. enccount)	
+	--gui.text(200, 216, "enc_rate:" .. encrate)
+	--gui.text(200, 208, "encounter:" .. enccount)	
 
 	-- if we're in battle, display enemy hp & random number
-	-- NOTICE: if you escape from a battle, then est1 does'nt initialize engrp num
+	-- NOTICE: when you escape from a battle, then est1 does'nt initialize engrp num
 	-- that causes mismatch of displayed info, like enemy hp info displayed, although we're not in battle
 
-	engrp[1] = memory.readbytesigned(0x7e13f2)
-	engrp[2] = memory.readbytesigned(0x7e13f3)
-	engrp[3] = memory.readbytesigned(0x7e13f4)
-	engrp[4] = memory.readbytesigned(0x7e13f5)
+	engrp[1] = memory.readbytesigned(0x7e13e2)
+	engrp[2] = memory.readbytesigned(0x7e13e3)
+	engrp[3] = memory.readbytesigned(0x7e13e4)
+	engrp[4] = memory.readbytesigned(0x7e13e5)
 
-	--初期化されていないおかしな値は表示されてしまう12000フレーム以前は情報を表示しない
+	--初期化されていないおかしな値は表示しない
 	if engrp[1] + engrp[2] + engrp[3] + engrp[4] > -4 
-		and ( emu.framecount() > 11990 and not( 71580 < emu.framecount() and emu.framecount() < 88423) ) then
-
+		and ( emu.framecount() > 11785 and not( 61996 < emu.framecount() and emu.framecount() < 81325) ) then
+		
 		enemy = 0
 		
 		if engrp[1] > -1 then enemy = enemy + engrp[1] end
 		if engrp[2] > -1 then enemy = enemy + engrp[2] end
 		if engrp[3] > -1 then enemy = enemy + engrp[3] end
 		if engrp[4] > -1 then enemy = enemy + engrp[4] end
-
+		
 		if enemy_count == 0 then
 			enemy_count = enemy
 		end
@@ -88,9 +93,10 @@ function display_all()
 		p3atp = memory.readword(0x7E1704)
 		p3atp_add = memory.readwordsigned(0x7E1734)
 		
-		gui.text( 20, 168, "ATP " .. p1atp .. " + " .. p1atp_add)
-		gui.text(152, 168, "ATP " .. p3atp .. " + " .. p3atp_add)
-		
+		--gui.text( 20, 168, "ATP " .. p1atp .. " + " .. p1atp_add)
+		--gui.text(152, 168, "ATP " .. p3atp .. " + " .. p3atp_add)
+	else
+		enemy_count = 0
 	end
 
 end

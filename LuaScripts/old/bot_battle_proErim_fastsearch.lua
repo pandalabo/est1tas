@@ -333,9 +333,37 @@ function pattern_01()
 	p3st = memory.readbyte(0x7E158D) --ガイ状態
 	p4st = memory.readbyte(0x7E158E) --アーティ状態
 	
-	r = mt19937.random(2)
-	if r == 1 then
+	r = mt19937.random(7)
+	if r == 1 or r == 2 then
 		weapon_attack()
+	elseif r == 3 then
+		if mirror_00_count < 1 then
+			mirror_00()
+			mirror_00_count = 2
+		else
+			pattern_01()	--再度行動選択
+		end
+	elseif r == 4 then
+		if mirror_01_count < 1 then
+			mirror_01()
+			mirror_01_count = 2
+		else
+			pattern_01()	--再度行動選択
+		end
+	elseif r == 5 then
+		if mirror_02_count < 1 then
+			mirror_02()
+			mirror_02_count = 2
+		else
+			pattern_01()	--再度行動選択
+		end
+	elseif r == 6 then
+		if mirror_03_count < 1 then
+			mirror_03()
+			mirror_03_count = 2
+		else
+			pattern_01()	--再度行動選択
+		end
 	else
 		guard()
 	end
@@ -417,28 +445,56 @@ function pattern_03()
 	end
 
 	r = mt19937.random(12)
-	if r == 1 then
+	if r == 1 or r == 2 then
 		--マキシムが生きていればトゥイークを使用（3回まで）
 		if p1hp > 0 and trick_00_count < 3 then
 			trick_00()	
 		else
 			pattern_03()	--再度行動選択
 		end
-	elseif r == 2 then
+	elseif r == 3 or r == 4 then
 		--ガイが生きていればトゥイークを使用（3回まで）
 		if p3hp > 0 and trick_01_count < 3 then
 			trick_01()	
 		else
 			pattern_03()	--再度行動選択
 		end
-	elseif r == 3 then
+	elseif r == 5 or r == 6 then
 		weapon_attack()
-	elseif r == 4 then
+	-- elseif r == 4 then --ミラールでドリッドをはじくことを期待して使わない
 		--ドリッドは2回まで、ムージルの状態でない
-		if dread_count < 2 and  p4st < 64 then
-			dread()
+		-- if dread_count < 2 and  p4st < 64 then
+			-- dread()
+		-- else
+			-- pattern_03() --再度行動選択
+		-- end
+	elseif r == 7 then
+		if mirror_00_count < 1 then
+			mirror_00()
+			mirror_00_count = 2
 		else
-			pattern_03() --再度行動選択
+			pattern_03()	--再度行動選択
+		end
+	elseif r == 8 then
+		if mirror_01_count < 1 then
+			mirror_01()
+			mirror_01_count = 2
+		else
+			pattern_03()	--再度行動選択
+		end
+	elseif r == 9 then
+		if mirror_02_count < 1 then
+			mirror_02()
+			mirror_02_count = 2
+		else
+			pattern_03()	--再度行動選択
+		end
+	elseif r == 10 then
+		if mirror_03_count < 1 then
+			mirror_03()
+			mirror_03_count = 2
+		else
+			pattern_03()	--再度行動選択
 		end
 	else
 		guard()

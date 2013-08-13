@@ -1,3 +1,4 @@
+-- snes9x improvement版用のゲーム内部値表示スクリプト
 local enccount
 local encrate
 local en1hp

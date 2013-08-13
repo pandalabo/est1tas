@@ -7,18 +7,24 @@
 	prologueのガデス用
 ]]
 
+--TAS用ライブラリ
+require "mylib9x"
 --use Mersenne Twister RNG, cuz math.rand from C Library is a bad algorithm
 require "mt19937"
+--戦闘用コマンドを読み込み
+require "battle_command"
+--メモリリスト取得
+require "est1mem"
 
 local frame	--現在検証中のフレーム
 local search_count = 0 --初期フレームからの試行回数
 
 --調査の限界
 --超過した場合、遅すぎるので中断（手動戦闘結果より遅かったら意味がない）
-local max_frame = 25000 --戦闘終了時（敵HPが0になった瞬間）の基準フレーム
+local max_frame = 25000 --戦闘終了時（敵HPが0になった瞬間）の基準フレーム (最適結果が出るたびに更新)
 local max_search = 120 --戦闘開始を遅らせて試行を始める最大フレーム数
 
-local try_count = 180 --1つの戦闘開始フレームに対し、BOT戦闘を試行する回数
+local try_count = 200 --1つの戦闘開始フレームに対し、BOT戦闘を試行する回数
 
 --調査中の最良結果フレーム
 local best_frame = 9999999
@@ -42,166 +48,18 @@ emu.speedmode("maximum")
 
 local result = false
 
---frameadvance( n time(s))
-function fadv(n)
-	for i=1,n do 
-		emu.frameadvance()
-	end
-end
-
---保存したステートから戦闘開始するための入力
-function start_command()
-	joypad.set(1,{A=true})
-	fadv(1)
-end
-
---通常攻撃
-function weapon_attack()
-	joypad.set(1,{A=true})
-	fadv(2)
-	joypad.set(1,{A=true})
-	fadv(2)
-end
-
---防御
-function guard()
-	joypad.set(1,{A=true,right=true})
-	fadv(2)
-end
-
-local trick_00_count = 0	--トゥイークの使用回数に制限
---トゥイーク⇒No.00(マキシム)
-function trick_00()
-	
-	trick_00_count = trick_00_count + 1 
-	
-	joypad.set(1,{A=true,up=true})
-	fadv(5)	--一覧ロード時間に若干差がある？ため1フレーム余裕を持たせる
-	joypad.set(1,{down=true})
-	fadv(2)
-	joypad.set(1,{down=true})
-	fadv(2)
-	joypad.set(1,{right=true})
-	fadv(2)
-	joypad.set(1,{A=true})
-	fadv(4)
-	joypad.set(1,{A=true})
-	fadv(3)
-	
-end
-
-local trick_01_count = 0	--トゥイークの使用回数に制限
---トゥイーク⇒No.01(ガイ)
-function trick_01()
-
-	trick_01_count = trick_01_count + 1 
-	
-	joypad.set(1,{A=true,up=true})
-	fadv(5)	--一覧ロード時間に若干差がある？ため1フレーム余裕を持たせる
-	joypad.set(1,{down=true})
-	fadv(2)
-	joypad.set(1,{down=true})
-	fadv(2)
-	joypad.set(1,{right=true})
-	fadv(2)
-	joypad.set(1,{A=true})
-	fadv(4)
-	joypad.set(1,{right=true})
-	fadv(2)
-	joypad.set(1,{A=true})
-	fadv(3)
-end
-
---ミラクロース⇒No.00（マキシム）
-function miracle_00()
-	joypad.set(1,{A=true,left=true})
-	fadv(5)	--一覧ロード時間に若干差がある？ため1フレーム余裕を持たせる
-	joypad.set(1,{A=true})
-	fadv(4)
-	joypad.set(1,{A=true})
-	fadv(3)
-end
-
---ミラクロース⇒No.01（ガイ）
-function miracle_01()
-	joypad.set(1,{A=true,left=true})
-	fadv(5)	--一覧ロード時間に若干差がある？ため1フレーム余裕を持たせる
-	joypad.set(1,{A=true})
-	fadv(4)
-	joypad.set(1,{right=true})
-	fadv(2)
-	joypad.set(1,{A=true})
-	fadv(3)
-
-end
-
---ミラクロース⇒No.02（アーティ）
-function miracle_02()
-	joypad.set(1,{A=true,left=true})
-	fadv(5)	--一覧ロード時間に若干差がある？ため1フレーム余裕を持たせる
-	joypad.set(1,{A=true})
-	fadv(4)
-	joypad.set(1,{down=true})
-	fadv(2)
-	joypad.set(1,{right=true})
-	fadv(2)
-	joypad.set(1,{A=true})
-	fadv(3)
-end
-
-local dread_count = 0	--ドリッド使用回数に制限
---ドリッド（アーティ）
-function dread()
-
-	dread_count = dread_count + 1
-
-	joypad.set(1,{A=true,up=true})
-	fadv(5)	--一覧ロード時間に若干差がある？ため1フレーム余裕を持たせる
-	joypad.set(1,{down=true})
-	fadv(2)
-	joypad.set(1,{A=true})
-	fadv(4)
-	joypad.set(1,{A=true})
-	fadv(3)
-end
-
---レ・ギオン（セレナ）
-function thunder()
-	joypad.set(1,{A=true,up=true})
-	fadv(5)	--一覧ロード時間に若干差がある？ため1フレーム余裕を持たせる
-	joypad.set(1,{A=true})
-	fadv(4)
-	joypad.set(1,{A=true})
-	fadv(3)
-end
-
---戦闘ロジック用変数をリセット
-function reset_var()
-	trick_00_count = 0
-	trick_01_count = 0
-	dread_count = 0
-end
-
 --各キャラの選択行動にはあまり状況判断ロジックを入れない
 --⇒意外な行動が乱数調整に役立ち、結果短縮につながる可能性がある
 
 --マキシムの行動
 function pattern_00()
 
-	--パーティのHPによる判断
-	p1hp_max = memory.readword(0x7E16F0)
-	p1hp = memory.readword(0x7E158F)
-	p2hp_max = memory.readword(0x7E16F2)
-	p2hp = memory.readword(0x7E1591)
-	p3hp_max = memory.readword(0x7E16F4)
-	p3hp = memory.readword(0x7E1593)
-	p4hp_max = memory.readword(0x7E16F6)
-	p4hp = memory.readword(0x7E1595)
-
+	memlist:updateMemberStatValue()
+	
 	r = mt19937.random(5)
 	if r == 1 then
 		--アーティが倒れていた場合
-		if p4hp == 0 then
+		if memlist.p4hp == 0 then
 			miracle_02()
 		else
 			pattern_00()	--再度行動選択
@@ -209,7 +67,7 @@ function pattern_00()
 		
 	elseif r == 2 then
 		--ガイが倒れていた場合
-		if p3hp == 0 then
+		if memlist.p3hp == 0 then
 			miracle_01()
 		else
 			pattern_00()	--再度行動選択
@@ -222,22 +80,6 @@ end
 --セレナの行動
 function pattern_01()
 
-	--パーティのHPによる判断
-	p1hp_max = memory.readword(0x7E16F0)
-	p1hp = memory.readword(0x7E158F)
-	p2hp_max = memory.readword(0x7E16F2)
-	p2hp = memory.readword(0x7E1591)
-	p3hp_max = memory.readword(0x7E16F4)
-	p3hp = memory.readword(0x7E1593)
-	p4hp_max = memory.readword(0x7E16F6)
-	p4hp = memory.readword(0x7E1595)
-	
-	--パーティの状態による判断（正常：0、まひ：+1、せきか：+2、どく：+16、戦闘不能：+32、ムージル：+64）
-	p1st = memory.readbyte(0x7E158B) --マキシム状態
-	p2st = memory.readbyte(0x7E158C) --セレナ状態
-	p3st = memory.readbyte(0x7E158D) --ガイ状態
-	p4st = memory.readbyte(0x7E158E) --アーティ状態
-	
 	r = mt19937.random(4)
 	if r == 1 or r == 2 then
 		thunder()
@@ -252,18 +94,10 @@ end
 --ガイの行動
 function pattern_02()
 
-	--パーティのHPによる判断
-	p1hp_max = memory.readword(0x7E16F0)
-	p1hp = memory.readword(0x7E158F)
-	p2hp_max = memory.readword(0x7E16F2)
-	p2hp = memory.readword(0x7E1591)
-	p3hp_max = memory.readword(0x7E16F4)
-	p3hp = memory.readword(0x7E1593)
-	p4hp_max = memory.readword(0x7E16F6)
-	p4hp = memory.readword(0x7E1595)
+	memlist:updateMemberStatValue()
 
 	--マキシム、アーティが倒れている場合はミラクロースを使用する確率を上げる
-	if p1hp == 0 then
+	if memlist.p1hp == 0 then
 		r = mt19937.random(3)
 		if r >= 2 then
 			miracle_00()
@@ -271,7 +105,7 @@ function pattern_02()
 		end
 	end
 	
-	if p4hp == 0 then
+	if memlist.p4hp == 0 then
 		r = mt19937.random(3)
 		if r >= 2 then
 			miracle_02()
@@ -290,24 +124,10 @@ end
 --アーティの行動
 function pattern_03()
 
-	--パーティのHPによる判断
-	p1hp_max = memory.readword(0x7E16F0)
-	p1hp = memory.readword(0x7E158F)
-	p2hp_max = memory.readword(0x7E16F2)
-	p2hp = memory.readword(0x7E1591)
-	p3hp_max = memory.readword(0x7E16F4)
-	p3hp = memory.readword(0x7E1593)
-	p4hp_max = memory.readword(0x7E16F6)
-	p4hp = memory.readword(0x7E1595)
-	
-	--パーティの状態による判断（正常：0、まひ：+1、せきか：+2、どく：+16、戦闘不能：+32、ムージル：+64）
-	p1st = memory.readbyte(0x7E158B) --マキシム状態
-	p2st = memory.readbyte(0x7E158C) --セレナ状態
-	p3st = memory.readbyte(0x7E158D) --ガイ状態
-	p4st = memory.readbyte(0x7E158E) --アーティ状態
+	memlist:updateMemberStatValue()
 		
 	--マキシム、ガイが倒れている場合はミラクロースを使用する確率を上げる
-	if p1hp == 0 then
+	if memlist.p1hp == 0 then
 		r = mt19937.random(3)
 		if r >= 2 then
 			miracle_00()
@@ -315,7 +135,7 @@ function pattern_03()
 		end
 	end
 	
-	if p3hp == 0 then
+	if memlist.p3hp == 0 then
 		r = mt19937.random(3)
 		if r >= 2 then
 			miracle_01()
@@ -326,14 +146,14 @@ function pattern_03()
 	r = mt19937.random(5)
 	if r == 1 then
 		--マキシムが生きていればトゥイークを使用（3回まで）
-		if p1hp > 0 and trick_00_count < 3 then
+		if memlist.p1hp > 0 and trick_00_count < 3 then
 			trick_00()	
 		else
 			pattern_03()	--再度行動選択
 		end
 	elseif r == 2 then
 		--ガイが生きていればトゥイークを使用（3回まで）
-		if p3hp > 0 and trick_01_count < 3 then
+		if memlist.p3hp > 0 and trick_01_count < 3 then
 			trick_01()	
 		else
 			pattern_03()	--再度行動選択
@@ -342,7 +162,7 @@ function pattern_03()
 		weapon_attack()
 	elseif r == 4 then
 		--ドリッドは2回まで、ムージルの状態でない
-		if dread_count < 2 and  p4st < 64 then
+		if dread_count < 2 and  memlist.p4st < 64 then
 			dread()
 		else
 			pattern_03() --再度行動選択
@@ -390,37 +210,23 @@ function failure()
 	--失敗条件を満たしたら、フラグをtrueにする
 	local fail_flag = false
 	
+	--戦闘時間が最短結果＋α超過した場合失敗
+    if max_frame < emu.framecount() then
+		fail_flag = true
+	end
+	
 	local total_damage = 0
 	
-	--パーティのHPによる判断
-	p1hp_max = memory.readword(0x7E16F0)
-	p1hp = memory.readword(0x7E158F)
-	p2hp_max = memory.readword(0x7E16F2)
-	p2hp = memory.readword(0x7E1591)
-	p3hp_max = memory.readword(0x7E16F4)
-	p3hp = memory.readword(0x7E1593)
-	p4hp_max = memory.readword(0x7E16F6)
-	p4hp = memory.readword(0x7E1595)
-	
-	--パーティの状態による判断（正常：0、まひ：+1、せきか：+2、どく：+16、戦闘不能：+32、ムージル：+64）
-	p1st = memory.readbyte(0x7E158B) --マキシム状態
-	p2st = memory.readbyte(0x7E158C) --セレナ状態
-	p3st = memory.readbyte(0x7E158D) --ガイ状態
-	p4st = memory.readbyte(0x7E158E) --アーティ状態
-	
+	memlist:updateMemberStatValue()
 	
 	--全員が倒れた場合、失敗
-	if p1hp == 0 and p2hp == 0 and p3hp == 0 and p4hp == 0 then	--セレナは抜けているため除外
+	if memlist.p1hp == 0 and memlist.p2hp == 0 
+		and memlist.p3hp == 0 and memlist.p4hp == 0 then
 		fail_flag = true
 	end
 		
 	--失敗フラグが立っていなければ戦闘続行
-	if fail_flag == false then
-		return false
-	end
-	
-	--上記条件以外
-	return true
+	return fail_flag
 
 end
 
@@ -477,15 +283,14 @@ function attempt()
 
 end
 
---bot成功判定 
+--bot戦闘 追加成功判定 
 function success()
+	local result = true
 		
 	--撃破時に誰かが倒れていた場合、失敗
-	p1hp = memory.readword(0x7E158F)
-	p2hp = memory.readword(0x7E1591)
-	p3hp = memory.readword(0x7E1593)
-	p4hp = memory.readword(0x7E1595)
-	if p1hp == 0 or p2hp == 0 or p3hp == 0 or p4hp == 0 then
+	memlist:updateMemberStatValue()
+	if memlist.p1hp == 0 or memlist.p2hp == 0 
+		or memlist.p3hp == 0 or memlist.p4hp == 0 then
 		return false
 	end
 		
@@ -520,7 +325,7 @@ while true do
 				best_frame = emu.framecount()
 				max_frame = best_frame + 60	--今後の探索では最短結果より遅い場合打ち切る
 				
-				print("best state is saved, framecount: " .. best_frame )
+				print("best state is saved, framecount: " .. best_frame .. "(" .. best_frame - beginning_frame .. ")" )
 			else
 				local state_good = savestate.create(6)
 				savestate.save(state_good)	--成功状態を保存
@@ -535,7 +340,7 @@ while true do
 	search_count = search_count + 1			
 	
 	if search_count > max_search then
-		print("search end, for excess of max_search")
+		print("search end, trying " .. max_search .. "times has finished")
 		break
 	end
 	
