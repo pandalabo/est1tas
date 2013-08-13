@@ -17,7 +17,7 @@ local search_count = 0 --初期フレームからの試行回数
 local max_frame = 50000 --戦闘終了時（敵HPが0になった瞬間）の基準フレーム
 local max_search = 200 --戦闘開始を遅らせて試行を始める最大フレーム数
 
-local try_count = 200 --1つの戦闘開始フレームに対し、BOT戦闘を試行する回数
+local try_count = 150 --1つの戦闘開始フレームに対し、BOT戦闘を試行する回数
 
 --調査中の最良結果フレーム
 local best_frame = 9999999
@@ -294,21 +294,21 @@ function pattern_00()
 	p4hp = memory.readword(0x7E1595)
 
 	r = mt19937.random(5)
-	if r == 1 then		
-		-- if p4hp == 0 then --アーティが倒れていた場合
-			-- miracle_02()
-		-- else
-			-- pattern_00()	--再度行動選択
-		-- end
+	if r == 1 then
+		--アーティが倒れていた場合
+		if p4hp == 0 then
+			miracle_02()
+		else
+			pattern_00()	--再度行動選択
+		end
 		
-	-- elseif r == 2 then
-		-- if p3hp == 0 then --ガイが倒れていた場合
-			-- miracle_01()
-		-- else
-			-- pattern_00()	--再度行動選択
-		-- end
-		
-		weapon_attack()
+	elseif r == 2 then
+		--ガイが倒れていた場合
+		if p3hp == 0 then
+			miracle_01()
+		else
+			pattern_00()	--再度行動選択
+		end
 	else 
 		weapon_attack()
 	end
@@ -333,11 +333,39 @@ function pattern_01()
 	p3st = memory.readbyte(0x7E158D) --ガイ状態
 	p4st = memory.readbyte(0x7E158E) --アーティ状態
 	
-	r = mt19937.random(4)
-	if r == 1 or r == 2 then
+	r = mt19937.random(7)
+	if r == 1 then
 		thunder()
-	elseif r == 3 then
+	elseif r == 2 then
 		weapon_attack()
+	elseif r == 3 then
+		if mirror_00_count < 1 then
+			mirror_00()
+			mirror_00_count = 2
+		else
+			pattern_01()	--再度行動選択
+		end
+	elseif r == 4 then
+		if mirror_01_count < 1 then
+			mirror_01()
+			mirror_01_count = 2
+		else
+			pattern_01()	--再度行動選択
+		end
+	elseif r == 5 then
+		if mirror_02_count < 1 then
+			mirror_02()
+			mirror_02_count = 2
+		else
+			pattern_01()	--再度行動選択
+		end
+	elseif r == 6 then
+		if mirror_03_count < 1 then
+			mirror_03()
+			mirror_03_count = 2
+		else
+			pattern_01()	--再度行動選択
+		end
 	else
 		guard()
 	end
@@ -358,21 +386,21 @@ function pattern_02()
 	p4hp = memory.readword(0x7E1595)
 
 	--マキシム、アーティが倒れている場合はミラクロースを使用する確率を上げる
-	-- if p1hp == 0 then
-		-- r = mt19937.random(3)
-		-- if r >= 2 then
-			-- miracle_00()
-			-- return
-		-- end
-	-- end
+	if p1hp == 0 then
+		r = mt19937.random(3)
+		if r >= 2 then
+			miracle_00()
+			return
+		end
+	end
 	
-	-- if p4hp == 0 then
-		-- r = mt19937.random(3)
-		-- if r >= 2 then
-			-- miracle_02()
-			-- return
-		-- end
-	-- end
+	if p4hp == 0 then
+		r = mt19937.random(3)
+		if r >= 2 then
+			miracle_02()
+			return
+		end
+	end
 
 	r = mt19937.random(6)
 	if r == 1 then
@@ -402,23 +430,23 @@ function pattern_03()
 	p4st = memory.readbyte(0x7E158E) --アーティ状態
 		
 	--マキシム、ガイが倒れている場合はミラクロースを使用する確率を上げる
-	-- if p1hp == 0 then
-		-- r = mt19937.random(3)
-		-- if r >= 2 then
-			-- miracle_00()
-			-- return
-		-- end
-	-- end
+	if p1hp == 0 then
+		r = mt19937.random(3)
+		if r >= 2 then
+			miracle_00()
+			return
+		end
+	end
 	
-	-- if p3hp == 0 then
-		-- r = mt19937.random(3)
-		-- if r >= 2 then
-			-- miracle_01()
-			-- return
-		-- end
-	-- end
+	if p3hp == 0 then
+		r = mt19937.random(3)
+		if r >= 2 then
+			miracle_01()
+			return
+		end
+	end
 
-	r = mt19937.random(5)
+	r = mt19937.random(8)
 	if r == 1 then
 		--マキシムが生きていればトゥイークを使用（3回まで）
 		if p1hp > 0 and trick_00_count < 3 then
@@ -435,12 +463,40 @@ function pattern_03()
 		end
 	elseif r == 3 then
 		weapon_attack()
-	elseif r == 4 then --ミラールでドリッドをはじくことを期待して使わない
+	-- elseif r == 4 then --ミラールでドリッドをはじくことを期待して使わない
 		--ドリッドは2回まで、ムージルの状態でない
-		if dread_count < 2 and  p4st < 64 then
-			dread()
+		-- if dread_count < 2 and  p4st < 64 then
+			-- dread()
+		-- else
+			-- pattern_03() --再度行動選択
+		-- end
+	elseif r == 4 then
+		if mirror_00_count < 1 then
+			mirror_00()
+			mirror_00_count = 2
 		else
-			pattern_03() --再度行動選択
+			pattern_03()	--再度行動選択
+		end
+	elseif r == 5 then
+		if mirror_01_count < 1 then
+			mirror_01()
+			mirror_01_count = 2
+		else
+			pattern_03()	--再度行動選択
+		end
+	elseif r == 6 then
+		if mirror_02_count < 1 then
+			mirror_02()
+			mirror_02_count = 2
+		else
+			pattern_03()	--再度行動選択
+		end
+	elseif r == 7 then
+		if mirror_03_count < 1 then
+			mirror_03()
+			mirror_03_count = 2
+		else
+			pattern_03()	--再度行動選択
 		end
 	else
 		guard()

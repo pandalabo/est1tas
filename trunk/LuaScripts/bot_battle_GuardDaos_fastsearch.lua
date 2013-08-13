@@ -6,15 +6,16 @@
 	最新の撃破状態をSL6,最短撃破状態をSL7に保存 
 ]]
 
-local frame	--現在検証中のフレーム
-local search_count = 0 --初期フレームからの試行回数
 
 --調査の限界
 --超過した場合、遅すぎるので中断（手動戦闘結果より遅かったら意味がない）
 local max_frame = 35000 --戦闘終了時（敵HPが0になった瞬間）の基準フレーム
 local max_search = 200 --戦闘開始を遅らせて試行を始める最大フレーム数
 
-local try_count = 400 --1つの戦闘開始フレームに対し、BOT戦闘を試行する回数
+local try_count = 500 --1つの戦闘開始フレームに対し、BOT戦闘を試行する回数
+
+local frame	--現在検証中のフレーム
+local search_count = 0 --初期フレームからの試行回数
 
 --調査中の最良結果フレーム
 local best_frame = 9999999
@@ -286,7 +287,7 @@ function pattern_01()
 	
 	if p3hp < p3hp_max/2 then
 		r = mt19937.random(3)
-		if r >= 2 then
+		if r >= 3 then
 			miracle_01()
 			return
 		end
@@ -339,7 +340,7 @@ function pattern_02()
 	
 	if p3hp < p3hp_max/2 then
 		r = mt19937.random(3)
-		if r >= 2 then
+		if r >= 3 then
 			miracle_01()
 			return
 		end
@@ -362,7 +363,7 @@ function pattern_02()
 			pattern_02()	--再度行動選択
 		end
 	elseif r == 2 then
-		--アグロスが\生きていればパワードラッグを使用（3回まで）
+		--アグロスが生きていればパワードラッグを使用（3回まで）
 		if p3hp > 0 and power_drug01_count < 3 then
 			power_drug01()	
 		else

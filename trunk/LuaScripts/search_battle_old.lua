@@ -14,14 +14,6 @@ emu.speedmode("turbo")
 --セーブステートの都合上registerafterが必要になる
 --フラグ管理関数をフレーム処理の直前にコールバックさせる
 emu.registerafter( function()
-	
-end)
-
---描画は不要
-
-while true do
-	
-	--状態遷移処理
 	if flag == 0 then
 		savestate.load(state) --やり直し開始であればSL
 		flag = 1 --フラグを1に進める	
@@ -29,7 +21,11 @@ while true do
 		savestate.save(state) --1フレーム進めた状態をSS
 		flag = 2 --フラグを2に進める
 	end
-	
+end)
+
+--描画は不要
+
+while true do
 	if flag == 2 then
 	--待ち中であれば、Aを押し続ける
 	--joypad.set(1,{A=true}) --攻撃/コマンド選択
@@ -49,7 +45,7 @@ while true do
 			emu.frameadvance()
 		end
 		
-		--目的の敵HPが目標値になっていれば調整終了
+		--目的の敵HPが目標値または目的のドロップを獲得もしくは両方を満たしていれば調整終了
 		en1hp = memory.readword(0x7ee542)
 		en2hp = memory.readword(0x7ee5C2)
 		en3hp = memory.readword(0x7ee642)
